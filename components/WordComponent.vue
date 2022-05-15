@@ -1,5 +1,5 @@
 <template>
-	<div class="space-y-2.5 p-2 bg-white rounded">
+	<div class="space-y-2.5 p-2 bg-white rounded max-w-fit">
 		<div v-for="(row, index) in wordToFind" :key="`row_${index}`"  class="flex gap-2.5">
 			<letter-component 
 				v-for="(letter, index) in row" 

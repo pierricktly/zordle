@@ -1,14 +1,14 @@
 <template>
 	<div 
-	class="flex flex-col items-center justify-center aspect-square rounded w-20 h-20"
+	class="flex flex-col items-center justify-center aspect-square rounded w-16 h-16"
 	:class="{
 		'bg-green-500': statut == 'ACCEPTED', 
 		'bg-red-500': statut == 'REJECTED', 
 		'bg-yellow-500': statut == 'FOUND', 
-		'bg-cyan-400': statut == 'NEUTRAL', 
-		'bg-blue-500': statut == 'ACTIVED'
+		'bg-[#0e141b]': statut == 'NEUTRAL', 
+		'bg-cyan-600': statut == 'ACTIVED'
 	}">
-		<p class="text-white font-bold text-5xl uppercase">{{ letter }}</p>
+		<p class="text-white font-bold text-4xl uppercase">{{ letter }}</p>
 	</div>
 </template>
 
