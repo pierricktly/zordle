@@ -1,6 +1,7 @@
 <template>
-  <div class="container mx-auto min-h-screen bg-green-500 flex justify-center items-center">
+  <div class="container mx-auto min-h-screen bg-green-500 flex flex-col justify-center items-center">
     <word-component :wordToFind="displayTries"/>
+    {{ letterFinded }}
   </div>
 </template>
 
@@ -11,10 +12,11 @@ export default {
   data() {
     return {
       displayTries: [],
+      letterFinded: [],
       currentLine: 0,
       currentLetter: 0,
       defaultLetter: {
-        letter: '.',
+        letter: '',
         isFound: false,
       }
     }
@@ -29,6 +31,7 @@ export default {
   created() {
     this.createTries();
     window.addEventListener('keydown', this.doCommand);
+    this.setFirstRow()
   },
   
   destroyed() {
@@ -37,16 +40,14 @@ export default {
 
   methods: {
     doCommand(e) {
-      console.log('keyCode', e.keyCode);
-      console.log('which', e.which);
-      console.log('e', e);
       let cmd = String.fromCharCode(e.keyCode).toLowerCase();
-      console.log(cmd);
 
       //si cmd est une lettre de l'alphabet
       if(cmd.match(/[a-z]/)) {
+        console.log(cmd, "It's a letter", " | ", "currentLine", this.currentLine, " | ", "currentLetter", this.currentLetter);
         //ajouter la lettre à la ligne courante
         this.displayTries[this.currentLine][this.currentLetter].letter = cmd;
+        this.displayTries[this.currentLine][this.currentLetter].statut = 'ACTIVED';
         this.currentLetter++;
         
         //si la lettre est la dernière de la ligne
@@ -55,11 +56,13 @@ export default {
           if(this.isWordFound()) {
             alert('Bravo !');
           } else {
+            console.log("It's a letter");
             //si la lettre est au bon endroit dans le mot son statut passe en ACCEPTED, si la lettre existe dans le mot il passe en FOUND sinon il passe en REJECTED
             for(let i = 0; i < this.displayTries[this.currentLine].length; i++) {
               let letter = this.displayTries[this.currentLine][i];
               if(letter.letter == this.wordToFind[i].toLocaleLowerCase()) {
                 letter.statut = 'ACCEPTED';
+                this.letterFinded[i].letter = letter.letter
               } else if(this.wordToFind.toLocaleLowerCase().indexOf(letter.letter) != -1) {
                 letter.statut = 'FOUND';
               } else {
@@ -70,12 +73,9 @@ export default {
             //passer à la ligne suivante
             this.currentLine++;
             this.currentLetter = 0;
-            //copier les lettres correct à la ligne d'en dessous
+            
             for(let i = 0; i < this.displayTries[this.currentLine].length; i++) {
-              console.log(this.displayTries[this.currentLine-1])
-              if(this.displayTries[this.currentLine-1][i].statut == 'ACCEPTED') {
-                this.displayTries[this.currentLine][i].letter = this.displayTries[this.currentLine-1][i].letter;
-              }
+              this.displayTries[this.currentLine][i].letter = structuredClone(this.letterFinded[i].letter)
             }
           }
         }
@@ -83,7 +83,8 @@ export default {
         //si la touche backspace est appuyée
         if(this.currentLetter > 0) {
           this.currentLetter--;
-          this.displayTries[this.currentLine][this.currentLetter].letter = this.defaultLetter.letter;
+          this.displayTries[this.currentLine][this.currentLetter].letter = '.';
+          this.displayTries[this.currentLine][this.currentLetter].statut = 'NEUTRAL';
         }
       }
     },
@@ -104,7 +105,21 @@ export default {
         for (let j = 0; j < this.wordToFind.length; j++) {
           row.push({ ...this.defaultLetter })
         }
+        this.letterFinded = structuredClone(row);
         this.displayTries.push(row)
+      }
+    },
+
+    setFirstRow() {
+      if(this.currentLine === 0) {
+        for(let i = 0; i < this.displayTries[this.currentLine].length; i++) {
+          if(this.displayTries[this.currentLine][i].letter == '') {
+            this.displayTries[this.currentLine][i].letter = '. ';
+            this.letterFinded[i].letter = '. ';
+          }
+        }
+        this.displayTries[this.currentLine][0].letter = this.wordToFind[0];
+        this.letterFinded[0].letter = this.wordToFind[0];
       }
     }
   }

@@ -5,7 +5,8 @@
 		'bg-green-500': statut == 'ACCEPTED', 
 		'bg-red-500': statut == 'REJECTED', 
 		'bg-yellow-500': statut == 'FOUND', 
-		'bg-cyan-400': statut == 'NEUTRAL'
+		'bg-cyan-400': statut == 'NEUTRAL', 
+		'bg-blue-500': statut == 'ACTIVED'
 	}">
 		<p class="text-white font-bold text-5xl uppercase">{{ letter }}</p>
 	</div>
