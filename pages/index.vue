@@ -26,19 +26,13 @@ export default {
         letter: '',
         statut: 'NEUTRAL',
       },
-      wordList: {
-
-      }
-    }
-  },
-
-  computed: {
-    wordToFind() {
-      return 'BONJOUR';
+      idWordSelected: 0,
+      wordList: ['hello', 'candy', 'mouse', 'lack', 'photography', 'winter'],
     }
   },
 
   created() {
+    this.idWordSelected = Math.floor(Math.random() * 7);
     this.createTries();
     window.addEventListener('keydown', this.doCommand);
     this.setFirstRow()
@@ -49,12 +43,12 @@ export default {
   },
 
   methods: {
-    doCommand(e) {
+    async doCommand(e) {
       let cmd = String.fromCharCode(e.keyCode).toLowerCase();
       //si cmd est une lettre de l'alphabet
       if(cmd.match(/[a-z]/)) {
         //ajouter la lettre à la ligne courante
-        if(this.currentLetter < this.wordToFind.length) {
+        if(this.currentLetter < this.wordList[this.idWordSelected].length) {
           this.displayTries[this.currentLine][this.currentLetter].statut = 'ACTIVED';
           this.displayTries[this.currentLine][this.currentLetter].letter = cmd;
           this.currentLetter++;
@@ -64,35 +58,38 @@ export default {
         //concaténer les lettres de la ligne courante
         let word = this.displayTries[this.currentLine].map(letter => letter.letter).join('');
         
-        //verifier si le mot entré est un vrai mot du dictionnaire
-
-
-
-
-        //verifier si le mot est trouvé
-        if(this.isWordFound()) {
-          alert('Bravo !');
-        } else {
-          //si la lettre est au bon endroit dans le mot son statut passe en ACCEPTED, si la lettre existe dans le mot il passe en FOUND sinon il passe en REJECTED
-          for(let i = 0; i < this.displayTries[this.currentLine].length; i++) {
-            let letter = this.displayTries[this.currentLine][i];
-            if(letter.letter == this.wordToFind[i].toLocaleLowerCase()) {
-              letter.statut = 'ACCEPTED';
-              this.letterFinded[i].letter = letter.letter
-            } else if(this.wordToFind.toLocaleLowerCase().indexOf(letter.letter) != -1) {
-              letter.statut = 'FOUND';
-            } else {
-              letter.statut = 'REJECTED';
+        //call api https://api.dictionaryapi.dev/api/v2/entries/en/<word>
+        const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
+        
+        if(response.status == 200) {
+          //verifier si le mot est trouvé
+          if(this.isWordFound()) {
+            alert('Bravo !');
+          } else {
+            //si la lettre est au bon endroit dans le mot son statut passe en ACCEPTED, si la lettre existe dans le mot il passe en FOUND sinon il passe en REJECTED
+            for(let i = 0; i < this.displayTries[this.currentLine].length; i++) {
+              let letter = this.displayTries[this.currentLine][i];
+              if(letter.letter == this.wordList[this.idWordSelected][i].toLocaleLowerCase()) {
+                letter.statut = 'ACCEPTED';
+                this.letterFinded[i].letter = letter.letter
+              } else if(this.wordList[this.idWordSelected].toLocaleLowerCase().indexOf(letter.letter) != -1) {
+                letter.statut = 'FOUND';
+              } else {
+                letter.statut = 'REJECTED';
+              }
+            }
+            
+            //passer à la ligne suivante
+            this.currentLine++;
+            this.currentLetter = 0;
+            
+            for(let i = 0; i < this.displayTries[this.currentLine].length; i++) {
+              this.displayTries[this.currentLine][i].letter = structuredClone(this.letterFinded[i].letter)
             }
           }
-          
-          //passer à la ligne suivante
-          this.currentLine++;
-          this.currentLetter = 0;
-          
-          for(let i = 0; i < this.displayTries[this.currentLine].length; i++) {
-            this.displayTries[this.currentLine][i].letter = structuredClone(this.letterFinded[i].letter)
-          }
+        }
+        else {
+          //le mot n'existe pas
         }
       }
       else if (e.keyCode == 8) {
@@ -108,7 +105,7 @@ export default {
     isWordFound() {
       for(let i = 0; i < this.displayTries[this.currentLine].length; i++) {
         //vérifier que chaque lettre correspond à la lettre du mot à trouver
-        if(this.displayTries[this.currentLine][i].letter != this.wordToFind[i].toLocaleLowerCase()) {
+        if(this.displayTries[this.currentLine][i].letter != this.wordList[this.idWordSelected][i].toLocaleLowerCase()) {
           return false;
         }
       }
@@ -118,7 +115,7 @@ export default {
     createTries(){
       for (let i = 0; i < 6; i++) {
         let row = []
-        for (let j = 0; j < this.wordToFind.length; j++) {
+        for (let j = 0; j < this.wordList[this.idWordSelected].length; j++) {
           row.push({ ...this.defaultLetter })
         }
         this.letterFinded = structuredClone(row);
@@ -134,8 +131,8 @@ export default {
             this.letterFinded[i].letter = '.';
           }
         }
-        this.displayTries[this.currentLine][0].letter = this.wordToFind[0].toLocaleLowerCase();
-        this.letterFinded[0].letter = this.wordToFind[0].toLocaleLowerCase();
+        this.displayTries[this.currentLine][0].letter = this.wordList[this.idWordSelected][0].toLocaleLowerCase();
+        this.letterFinded[0].letter = this.wordList[this.idWordSelected][0].toLocaleLowerCase();
       }
     }
   }
