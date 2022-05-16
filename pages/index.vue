@@ -18,14 +18,14 @@ export default {
 
   data() {
     return {
-      displayTries: [],
-      letterFinded: [],
-      currentLine: 0,
-      currentLetter: 0,
       defaultLetter: {
         letter: '',
         statut: 'NEUTRAL',
       },
+      displayTries: [],
+      letterFinded: [],
+      currentLine: 0,
+      currentLetter: 0,
       idWordSelected: 0,
       wordList: ['hello', 'candy', 'mouse', 'lack', 'photography', 'winter'],
     }
@@ -90,6 +90,7 @@ export default {
         }
         else {
           //le mot n'existe pas
+          this.$toast.error("This word doesn't exist", { duration: 5000, position: "top-right" });
           for(let i = 0; i < this.displayTries[this.currentLine].length; i++) {
             if(this.currentLetter > 0) {
               this.currentLetter--;
