@@ -90,6 +90,13 @@ export default {
         }
         else {
           //le mot n'existe pas
+          for(let i = 0; i < this.displayTries[this.currentLine].length; i++) {
+            if(this.currentLetter > 0) {
+              this.currentLetter--;
+              this.displayTries[this.currentLine][this.currentLetter].letter = '.';
+              this.displayTries[this.currentLine][this.currentLetter].statut = 'NEUTRAL';
+            }
+          }
         }
       }
       else if (e.keyCode == 8) {
