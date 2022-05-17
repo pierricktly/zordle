@@ -32,7 +32,7 @@ export default {
   },
 
   created() {
-    this.idWordSelected = Math.floor(Math.random() * 7);
+    this.idWordSelected = Math.floor(Math.random() * 6);
     this.createTries();
     window.addEventListener('keydown', this.doCommand);
     this.setFirstRow()
@@ -64,7 +64,8 @@ export default {
         if(response.status == 200) {
           //verifier si le mot est trouvé
           if(this.isWordFound()) {
-            alert('Bravo !');
+            alert('Congratulation!');
+            window.location.reload(true)
           } else {
             //si la lettre est au bon endroit dans le mot son statut passe en ACCEPTED, si la lettre existe dans le mot il passe en FOUND sinon il passe en REJECTED
             for(let i = 0; i < this.displayTries[this.currentLine].length; i++) {
@@ -82,6 +83,10 @@ export default {
             //passer à la ligne suivante
             this.currentLine++;
             this.currentLetter = 0;
+            if(this.currentLine >= 6) {
+              alert('Failed sorry!');
+              window.location.reload(true)
+            }
             
             for(let i = 0; i < this.displayTries[this.currentLine].length; i++) {
               this.displayTries[this.currentLine][i].letter = structuredClone(this.letterFinded[i].letter)
@@ -90,7 +95,7 @@ export default {
         }
         else {
           //le mot n'existe pas
-          this.$toast.error("This word doesn't exist", { duration: 5000, position: "top-right" });
+          this.$toast.error("This word is not accepted", { duration: 5000, position: "top-right" });
           for(let i = 0; i < this.displayTries[this.currentLine].length; i++) {
             if(this.currentLetter > 0) {
               this.currentLetter--;
