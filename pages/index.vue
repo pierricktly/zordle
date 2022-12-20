@@ -26,13 +26,20 @@ export default {
       letterFinded: [],
       currentLine: 0,
       currentLetter: 0,
-      idWordSelected: 0,
       wordList: ['hello', 'candy', 'mouse', 'lack', 'photography', 'winter'],
     }
   },
 
+  asyncData({ $axios }) {
+    return $axios.$get('https://random-word-api.herokuapp.com/word')
+      .then((response) => {
+        return {
+          word: response[0],
+        }
+      })
+  },
+
   created() {
-    this.idWordSelected = Math.floor(Math.random() * 6);
     this.createTries();
     window.addEventListener('keydown', this.doCommand);
     this.setFirstRow()
@@ -48,7 +55,7 @@ export default {
       //si cmd est une lettre de l'alphabet
       if(cmd.match(/[a-z]/)) {
         //ajouter la lettre à la ligne courante
-        if(this.currentLetter < this.wordList[this.idWordSelected].length) {
+        if(this.currentLetter < this.word.length) {
           this.displayTries[this.currentLine][this.currentLetter].statut = 'ACTIVED';
           this.displayTries[this.currentLine][this.currentLetter].letter = cmd;
           this.currentLetter++;
@@ -59,7 +66,7 @@ export default {
         let word = this.displayTries[this.currentLine].map(letter => letter.letter).join('');
         
         //call api https://api.dictionaryapi.dev/api/v2/entries/en/<word>
-        const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
+        const response = await fetch(`https://api.wordnik.com/v4/word.json/${word}/definitions?limit=200&includeRelated=false&useCanonical=false&includeTags=false&api_key=a2a73e7b926c924fad7001ca3111acd55af2ffabf50eb4ae5`);
         
         if(response.status == 200) {
           //verifier si le mot est trouvé
@@ -70,10 +77,10 @@ export default {
             //si la lettre est au bon endroit dans le mot son statut passe en ACCEPTED, si la lettre existe dans le mot il passe en FOUND sinon il passe en REJECTED
             for(let i = 0; i < this.displayTries[this.currentLine].length; i++) {
               let letter = this.displayTries[this.currentLine][i];
-              if(letter.letter == this.wordList[this.idWordSelected][i].toLocaleLowerCase()) {
+              if(letter.letter == this.word[i].toLocaleLowerCase()) {
                 letter.statut = 'ACCEPTED';
                 this.letterFinded[i].letter = letter.letter
-              } else if(this.wordList[this.idWordSelected].toLocaleLowerCase().indexOf(letter.letter) != -1) {
+              } else if(this.word.toLocaleLowerCase().indexOf(letter.letter) != -1) {
                 letter.statut = 'FOUND';
               } else {
                 letter.statut = 'REJECTED';
@@ -116,9 +123,10 @@ export default {
     },
 
     isWordFound() {
+      console.log("isWordFound")
       for(let i = 0; i < this.displayTries[this.currentLine].length; i++) {
         //vérifier que chaque lettre correspond à la lettre du mot à trouver
-        if(this.displayTries[this.currentLine][i].letter != this.wordList[this.idWordSelected][i].toLocaleLowerCase()) {
+        if(this.displayTries[this.currentLine][i].letter != this.word[i].toLocaleLowerCase()) {
           return false;
         }
       }
@@ -128,7 +136,7 @@ export default {
     createTries(){
       for (let i = 0; i < 6; i++) {
         let row = []
-        for (let j = 0; j < this.wordList[this.idWordSelected].length; j++) {
+        for (let j = 0; j < this.word.length; j++) {
           row.push({ ...this.defaultLetter })
         }
         this.letterFinded = structuredClone(row);
@@ -144,8 +152,8 @@ export default {
             this.letterFinded[i].letter = '.';
           }
         }
-        this.displayTries[this.currentLine][0].letter = this.wordList[this.idWordSelected][0].toLocaleLowerCase();
-        this.letterFinded[0].letter = this.wordList[this.idWordSelected][0].toLocaleLowerCase();
+        this.displayTries[this.currentLine][0].letter = this.word[0].toLocaleLowerCase();
+        this.letterFinded[0].letter = this.word[0].toLocaleLowerCase();
       }
     }
   }
